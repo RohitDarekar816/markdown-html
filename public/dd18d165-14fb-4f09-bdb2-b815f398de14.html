@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converted Markdown</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #333;
+        }
+        blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 10px;
+            margin-left: 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>PostgreSQL Installation and Setup Guide</h1>
+<p>This guide documents the complete PostgreSQL installation and configuration process performed on Ubuntu 24.04.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>Ubuntu 24.04 (or similar Debian-based system)</li>
+<li>sudo privileges</li>
+</ul>
+<h2>Complete Uninstall (if needed)</h2>
+<p>If you need to remove an existing PostgreSQL installation:</p>
+<pre><code class="language-bash"># Stop PostgreSQL service
+sudo systemctl stop postgresql
+
+# Remove all PostgreSQL packages
+sudo apt-get remove --purge postgresql* -y
+
+# Remove data directories
+sudo rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/
+
+# Clean up unused packages
+sudo apt autoremove -y
+</code></pre>
+<h2>Fresh Installation</h2>
+<h3>1. Install PostgreSQL</h3>
+<pre><code class="language-bash"># Update package list
+sudo apt update
+
+# Install PostgreSQL and contrib packages
+sudo apt install postgresql postgresql-contrib -y
+</code></pre>
+<h3>2. Verify Installation</h3>
+<pre><code class="language-bash"># Check PostgreSQL service status
+sudo systemctl status postgresql
+
+# Check specific cluster status
+sudo systemctl status postgresql@16-main
+</code></pre>
+<h3>3. Test Connection as postgres User</h3>
+<pre><code class="language-bash"># Connect to PostgreSQL
+sudo -u postgres psql
+
+# Check version
+sudo -u postgres psql -c &quot;SELECT version();&quot;
+
+# List databases
+sudo -u postgres psql -c &quot;\l&quot;
+</code></pre>
+<h2>User Configuration</h2>
+<h3>1. Create PostgreSQL User for System User</h3>
+<p>Replace <code>rohitdarekar</code> with your actual username:</p>
+<pre><code class="language-bash"># Create PostgreSQL superuser matching your system username
+sudo -u postgres createuser -s rohitdarekar
+
+# Create a database with the same name
+sudo -u postgres createdb rohitdarekar
+</code></pre>
+<h3>2. Set Password for User</h3>
+<pre><code class="language-bash"># Set password for the user
+psql -c &quot;ALTER USER rohitdarekar WITH PASSWORD 'password';&quot;
+</code></pre>
+<h3>3. Create Application Database</h3>
+<pre><code class="language-bash"># Create the filing database
+psql -c &quot;CREATE DATABASE filing;&quot;
+</code></pre>
+<h3>4. Create Additional Users</h3>
+<p>To create additional PostgreSQL users:</p>
+<pre><code class="language-bash"># Create user 'user' with password and superuser privileges
+sudo -u postgres psql -c &quot;CREATE USER \&quot;user\&quot; WITH PASSWORD 'UeoMMmQLhxsI' SUPERUSER;&quot;
+
+# Create a database for the user
+sudo -u postgres createdb user
+</code></pre>
+<h2>Testing Connection</h2>
+<h3>As Normal User (without sudo)</h3>
+<pre><code class="language-bash"># Connect to default database
+psql
+
+# Connect to specific database
+psql -d filing
+
+# Connect to postgres database
+psql -d postgres
+</code></pre>
+<h3>With Password Authentication</h3>
+<pre><code class="language-bash"># Connect with password prompt
+psql -U rohitdarekar -d filing -h localhost
+
+# Or set password in environment
+PGPASSWORD=password psql -U rohitdarekar -d filing -h localhost
+</code></pre>
+<h2>Verification Commands</h2>
+<pre><code class="language-bash"># Check current user and database
+psql -c &quot;SELECT current_user, current_database();&quot;
+
+# List all databases
+psql -c &quot;\l&quot;
+
+# Connect to filing database and verify
+psql -d filing -c &quot;SELECT current_database(), current_user;&quot;
+</code></pre>
+<h2>Installation Summary</h2>
+<p><strong>PostgreSQL Version:</strong> 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)</p>
+<p><strong>Created Resources:</strong></p>
+<ul>
+<li>User: <code>rohitdarekar</code> (superuser)</li>
+<li>Password: <code>password</code></li>
+<li>Databases: <code>rohitdarekar</code>, <code>filing</code></li>
+<li>Default port: <code>5432</code></li>
+<li>Connection: Unix socket at <code>/var/run/postgresql</code></li>
+</ul>
+<h2>Quick Reference</h2>
+<pre><code class="language-bash"># Start PostgreSQL
+sudo systemctl start postgresql
+
+# Stop PostgreSQL
+sudo systemctl stop postgresql
+
+# Restart PostgreSQL
+sudo systemctl restart postgresql
+
+# Enable on boot
+sudo systemctl enable postgresql
+
+# Check status
+sudo systemctl status postgresql
+</code></pre>
+<h2>Notes</h2>
+<ul>
+<li>The user <code>rohitdarekar</code> has superuser privileges</li>
+<li>Password authentication is configured for local connections</li>
+<li>Default authentication method: peer (for Unix socket) and scram-sha-256 (for TCP/IP)</li>
+<li>Change the password <code>'password'</code> to a secure password in production environments</li>
+</ul>
+
+</body>
+</html>
+    
