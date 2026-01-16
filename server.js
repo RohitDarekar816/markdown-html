@@ -175,6 +175,58 @@ app.post('/upload', upload.single('file'), (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /files:
+ *   get:
+ *     summary: Get list of all converted Markdown files
+ *     description: Returns a list of all generated HTML files with their URLs and metadata
+ *     responses:
+ *       200:
+ *         description: List of converted files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       size:
+ *                         type: integer
+ */
+app.get('/files', (req, res) => {
+  try {
+    const files = fs.readdirSync('public')
+      .filter(file => file.endsWith('.html'))
+      .map(file => {
+        const filePath = path.join('public', file);
+        const stats = fs.statSync(filePath);
+        return {
+          id: file.replace('.html', ''),
+          url: `http://localhost:${port}/${file}`,
+          createdAt: stats.birthtime,
+          size: stats.size
+        };
+      })
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by newest first
+
+    res.json({ files });
+  } catch (error) {
+    console.error('Error listing files:', error);
+    res.status(500).json({ error: 'Error retrieving file list' });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
